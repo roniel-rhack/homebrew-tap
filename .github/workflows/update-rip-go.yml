@@ -1,0 +1,74 @@
+name: Update rip-go formula
+
+on:
+  repository_dispatch:
+    types: [rip-go-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to update (e.g., 0.2.0)'
+        required: true
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        env:
+          DISPATCH_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "repository_dispatch" ]; then
+            VERSION="$DISPATCH_VERSION"
+          else
+            VERSION="$INPUT_VERSION"
+          fi
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download checksums
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          curl -sL "https://github.com/roniel-rhack/rip-go/releases/download/v${VERSION}/checksums.txt" -o checksums.txt
+          cat checksums.txt
+
+      - name: Update formula
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          SHA_ARM64=$(grep "darwin-arm64" checksums.txt | awk '{print $1}')
+          SHA_AMD64=$(grep "darwin-amd64" checksums.txt | awk '{print $1}')
+          SHA_LINUX=$(grep "linux-amd64" checksums.txt | awk '{print $1}')
+
+          echo "Updating to version $VERSION"
+          echo "SHA256 darwin-arm64: $SHA_ARM64"
+          echo "SHA256 darwin-amd64: $SHA_AMD64"
+          echo "SHA256 linux-amd64: $SHA_LINUX"
+
+          sed -i "s/version \".*\"/version \"$VERSION\"/" Formula/rip-go.rb
+
+          # Update sha256 for darwin-arm64 (first sha256 in on_arm block)
+          sed -i "/on_arm do/{n;n;s/sha256 \".*\"/sha256 \"$SHA_ARM64\"/}" Formula/rip-go.rb
+
+          # Update sha256 for darwin-amd64 (first sha256 in on_intel block)
+          sed -i "/on_intel do/{n;n;s/sha256 \".*\"/sha256 \"$SHA_AMD64\"/}" Formula/rip-go.rb
+
+          # Update sha256 for linux (first sha256 in on_linux block)
+          sed -i "/on_linux do/{n;n;s/sha256 \".*\"/sha256 \"$SHA_LINUX\"/}" Formula/rip-go.rb
+
+          cat Formula/rip-go.rb
+
+      - name: Commit and push
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/rip-go.rb
+          git commit -m "Update rip-go to v${VERSION}"
+          git push
