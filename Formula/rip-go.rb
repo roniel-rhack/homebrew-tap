@@ -1,23 +1,23 @@
 class RipGo < Formula
   desc "Fuzzy find and kill processes from your terminal"
   homepage "https://github.com/roniel-rhack/rip-go"
-  version "0.2.0"
+  version "0.2.1"
   license "MIT"
 
   on_macos do
     on_arm do
       url "https://github.com/roniel-rhack/rip-go/releases/download/v#{version}/rip-go-darwin-arm64.tar.gz"
-      sha256 "ec0d1a161dc3dc25068d934ad4c5f117b9fde1805b4c6a60277a3303fb6dbeb5"
+      sha256 "f247328c7d67e46eb2da561c8a9b9f31b1ad700e8b768cdbd0d8034bcaa05235"
     end
     on_intel do
       url "https://github.com/roniel-rhack/rip-go/releases/download/v#{version}/rip-go-darwin-amd64.tar.gz"
-      sha256 "ec171ef02327d55697ccd7d486dcb0292b745f17c4a8a11cb1d58510b807d0d7"
+      sha256 "236ce4a804ad449f49c9b79186cf5522124621fb418132c6e19a52ed32ed5847"
     end
   end
 
   on_linux do
     url "https://github.com/roniel-rhack/rip-go/releases/download/v#{version}/rip-go-linux-amd64.tar.gz"
-    sha256 "ff42538d5b181d80877a3fbd9c8e2ebc597fc8a6c5db12fcd96aafd28a6b980f"
+    sha256 "0e1aaaf3537843a0116eaa39e3434e4ed4b1464e6f431a773b30b2e11f452c9d"
   end
 
   def install
