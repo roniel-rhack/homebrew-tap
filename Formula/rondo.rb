@@ -7,17 +7,17 @@ class Rondo < Formula
   on_macos do
     on_arm do
       url "https://github.com/roniel-rhack/rondo/releases/download/v#{version}/rondo-darwin-arm64.tar.gz"
-      sha256 "7400e0c50fb698cce680e7122052323035f82a100dc6208f7f15a353e22a85b6"
+      sha256 "40dbe0e5b47e45aac4d95f52b628cb3b57f8f564962ed215d88957f1dc63d563"
     end
     on_intel do
       url "https://github.com/roniel-rhack/rondo/releases/download/v#{version}/rondo-darwin-amd64.tar.gz"
-      sha256 "ca52e5cdbdbed974e4da89f98e2aee1c59cdcae8697d12e69d3df2b2d00f77ae"
+      sha256 "003e7af4240b62284d1b00bfae4070da31351e52fc06cd72869d7f3c9be86fe0"
     end
   end
 
   on_linux do
     url "https://github.com/roniel-rhack/rondo/releases/download/v#{version}/rondo-linux-amd64.tar.gz"
-    sha256 "f0ec65ae49d70fc051e21f0acb569cff1ff22cad7f4257fd2c1ad45fb075d5d0"
+    sha256 "2a1630cdef0b657f50095633ac179b6fe72071679f80bbe84acda01f29dde80f"
   end
 
   def install
