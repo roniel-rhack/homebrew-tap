@@ -1,0 +1,110 @@
+name: Update rondo-rs formula
+
+on:
+  repository_dispatch:
+    types: [update-rondo-rs]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to update (e.g., 0.1.0)"
+        required: true
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Get version
+        id: version
+        env:
+          DISPATCH_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "repository_dispatch" ]; then
+            VERSION="$DISPATCH_VERSION"
+          else
+            VERSION="$INPUT_VERSION"
+          fi
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download checksums
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          curl -sL "https://github.com/roniel-rhack/rondo-rs/releases/download/v${VERSION}/checksums-sha256.txt" -o checksums.txt
+          cat checksums.txt
+
+      - name: Update formula
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          SHA_MACOS_ARM64=$(grep "rondo-rs-macos-arm64" checksums.txt | awk '{print $1}')
+          SHA_MACOS_AMD64=$(grep "rondo-rs-macos-amd64" checksums.txt | awk '{print $1}')
+          SHA_LINUX_ARM64=$(grep "rondo-rs-linux-arm64" checksums.txt | awk '{print $1}')
+          SHA_LINUX_AMD64=$(grep "rondo-rs-linux-amd64" checksums.txt | awk '{print $1}')
+
+          echo "Updating to version $VERSION"
+          echo "SHA256 macos-arm64: $SHA_MACOS_ARM64"
+          echo "SHA256 macos-amd64: $SHA_MACOS_AMD64"
+          echo "SHA256 linux-arm64: $SHA_LINUX_ARM64"
+          echo "SHA256 linux-amd64: $SHA_LINUX_AMD64"
+
+          cat > Formula/rondo-rs.rb << FORMULA
+          class RondoRs < Formula
+            desc "TUI task manager + journal (Rust rewrite of rondo)"
+            homepage "https://github.com/roniel-rhack/rondo-rs"
+            version "$VERSION"
+            license "MIT"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/roniel-rhack/rondo-rs/releases/download/v#{version}/rondo-rs-macos-arm64"
+                sha256 "$SHA_MACOS_ARM64"
+              end
+              on_intel do
+                url "https://github.com/roniel-rhack/rondo-rs/releases/download/v#{version}/rondo-rs-macos-amd64"
+                sha256 "$SHA_MACOS_AMD64"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "https://github.com/roniel-rhack/rondo-rs/releases/download/v#{version}/rondo-rs-linux-arm64"
+                sha256 "$SHA_LINUX_ARM64"
+              end
+              on_intel do
+                url "https://github.com/roniel-rhack/rondo-rs/releases/download/v#{version}/rondo-rs-linux-amd64"
+                sha256 "$SHA_LINUX_AMD64"
+              end
+            end
+
+            def install
+              binary = stable.url.split("/").last
+              mv binary, "rondo-rs"
+              bin.install "rondo-rs"
+            end
+
+            test do
+              assert_predicate bin/"rondo-rs", :executable?
+            end
+          end
+          FORMULA
+
+          sed -i 's/^          //' Formula/rondo-rs.rb
+          cat Formula/rondo-rs.rb
+
+      - name: Commit and push
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/rondo-rs.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update rondo-rs to v${VERSION}"
+          git push
