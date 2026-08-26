@@ -1,28 +1,28 @@
 class RondoOpentui < Formula
   desc "TUI task manager and journal built with OpenTUI and React"
   homepage "https://github.com/roniel-rhack/rondo-opentui"
-  version "0.4.0"
+  version "0.4.1"
   license "MIT"
 
   on_macos do
     on_arm do
       url "https://github.com/roniel-rhack/rondo-opentui/releases/download/v#{version}/rondo-opentui-darwin-arm64.tar.gz"
-      sha256 "cffb7ad6706cbb6b8665c96561b18d7f28cc8c8545bc6da609134f8baac694ad"
+      sha256 "2bf846be7fe9c159e81c376b93b927c9ca2938cae3fb2890915a1335a6988758"
     end
     on_intel do
       url "https://github.com/roniel-rhack/rondo-opentui/releases/download/v#{version}/rondo-opentui-darwin-amd64.tar.gz"
-      sha256 "05b1dc3f3eac78803b6d4736c528508fdf9a31cf05109cd41d34045a120d23ee"
+      sha256 "ad3f07bfd2c481e08e4739df662f5101641050344b8c2676f657cfb9f63f6c67"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/roniel-rhack/rondo-opentui/releases/download/v#{version}/rondo-opentui-linux-arm64.tar.gz"
-      sha256 "b82001c0688e93959bbd76e46cef59d68b655cabedb3a8701d0950dfe9fd267e"
+      sha256 "573c307b300b04ddacf49471ae860dadd562212557c48468e000e50770b17759"
     end
     on_intel do
       url "https://github.com/roniel-rhack/rondo-opentui/releases/download/v#{version}/rondo-opentui-linux-amd64.tar.gz"
-      sha256 "0b087d1b5a1b9292472023e1154a119a2a274996fadaa70008d0e290dfb04bde"
+      sha256 "2495264a9eb0f7c464d3613c6722bd5b8f2131073d98d2567a5425d4d7302b06"
     end
   end
 
